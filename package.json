@@ -17,7 +17,8 @@
   },
   "homepage": "https://github.com/ajthor/neuron-core#readme",
   "dependencies": {
-    "nconf": "^0.8.4",
+    "bluebird": "^3.4.1",
+    "convict": "^1.4.0",
     "zerorpc": "^0.9.6",
     "zmq": "^2.15.3"
   },
