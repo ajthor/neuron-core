@@ -1,10 +1,16 @@
 'use strict';
 var EventEmitter = require('events').EventEmitter;
 
-const zerorpc =  require('zerorpc');
 const Builder = require('./builder');
 
+const nconf = require('nconf');
 const Promise = require('bluebird');
+const winston = require('winston');
+const zerorpc = require('zerorpc');
+
+const log = winston.loggers.get('terminal');
+
+Promise.longStackTraces();
 
 function Manager(options) {
 	if (!(this instanceof Manager)) {
@@ -15,7 +21,6 @@ function Manager(options) {
 
 	options = options || {};
 
-  this.bldr = new Builder(options);
   // Set up ZeroRPC server.
   // this.server = new zerorpc.Server({
   //   build: function(name, reply) {
@@ -32,11 +37,24 @@ function Manager(options) {
 module.exports = Manager;
 
 Manager.prototype._build = function (options) {
-  return Promise.resolve(this.bldr.build());
+  let bldr = new Builder(options);
+  // Object to pass to neuron-build build function.
+  let args = {weeble: "wobble"};
+
+  return Promise.resolve(bldr.build(args, options));
+};
+
+Manager.prototype._createWorker = function (options) {
+  // Object to pass to neuron-worker.
+  let args = {weeble: "wobble"};
+
+  return Promise.resolve(this.wrkr.run(args, options));
 };
 
 Manager.prototype.run = function(options) {
-  this._build();
+  log.debug('Running script.');
 
-  console.log('Running.');
+  return this._build();
+  // this.bldr.client.close();
+
 };
