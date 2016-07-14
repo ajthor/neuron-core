@@ -1,16 +1,24 @@
 'use strict';
 
-const fs = require('fs');
 const path = require('path');
-
 const nconf = require('nconf');
-const winston = require('winston');
 
-const validate = require('./src/validate');
-const Listener = require('./src/listener');
 const Manager = require('./src/manager');
 
-// nconf options
+//
+// Create Express/Socket.io applocation.
+//
+
+// TODO: Determine if I really need to use Express at all. The web interface
+// for control would be nice, but perhaps I could incorporate that into another
+// repository.
+var app = require('express')();
+var server = require('http').Server(app);
+var io = require('socket.io')(server);
+
+//
+// Get nconf options
+//
 nconf.overrides({
   'always': 'be this value'
 });
@@ -23,40 +31,42 @@ nconf.defaults({
   'l': 'info'
 });
 
-// Set up logger.
-winston.loggers.add('terminal', {
-  console: {
-    level: nconf.get('l') || 'info',
-    colorize: true,
-    label: 'terminal logger'
-  }
-});
-// var log = new winston.Logger({
-//   level: nconf.get('l'),
-//   transports: [
-//     new (winston.transports.Console)()
-//   ]
-// });
+const network = nconf.get('network');
 
-function Neuron (options) {
-
-}
-
-Neuron.prototype.run = function (options) {
-  let mgr = new Manager();
-  let lstn = new Listener();
-  // main
-  lstn.start();
-  mgr.run();
-
-  lstn.stop();
-};
-
-var network = nconf.get('network');
-
-var instance = new Neuron({
+//
+// Create Manager object for controlling the back-end.
+//
+var mgr = new Manager({
   network: network
 });
 
-instance.run();
-module.exports = instance;
+//
+// Set up Express/Socket.io listener.
+//
+server.listen(network.listener.port);
+
+// var io = require('socket.io')(80);
+
+//
+// Express/Socket.io server events.
+//
+app.get('/', function(req, res){
+  res.send('<p>Hello world</p>');
+});
+
+io.on('connection', function (socket) {
+  console.log('a user connected');
+
+  socket.on('disconnect', function(){
+    console.log('user disconnected');
+  });
+
+  socket.on('message', msg => {
+    console.log('recieved message: ', JSON.stringify(msg));
+
+  });
+});
+
+// server.listen(network.listener.port, function(){
+//   console.log('listening on *:' + network.listener.port);
+// });
