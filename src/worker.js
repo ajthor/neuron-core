@@ -1,12 +1,8 @@
 'use strict';
 var EventEmitter = require('events').EventEmitter;
 
-const nconf = require('nconf');
 const Promise = require('bluebird');
-const winston = require('winston');
 const zerorpc = require('zerorpc');
-
-const log = winston.loggers.get('terminal');
 
 Promise.longStackTraces();
 
@@ -29,13 +25,11 @@ function Worker(options) {
 module.exports = Worker;
 
 Worker.prototype.run = function (args, options) {
-  log.info('Sending job to worker.');
-
   // Validate and then send a command to build the docker container.
   return Promise.resolve(this.connect(options))
     .then(this.validate(options))
     .then(this.client.invoke("build", args, (error, res, ...rest) => {
-      log.debug('Response:', res);
+      console.log(res);
     }))
     .then(this.disconnect(options));
 };
@@ -48,4 +42,11 @@ Worker.prototype.connect = function (options) {
 
 Worker.prototype.disconnect = function (options) {
   this.client.close();
+};
+
+Worker.prototype.validate = function (options) {
+  // Send a command via ZeroRPC to neuron-build to validate the build script.
+  return this.client.invoke("validate", options, (error, res, ...rest) => {
+    console.log(res);
+  });
 };
