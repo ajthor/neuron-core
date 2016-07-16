@@ -43,7 +43,9 @@ var mgr = new Manager({
 //
 // Set up Express/Socket.io listener.
 //
-server.listen(network.listener.port);
+server.listen(network.listener.port, () => {
+  console.log('Listening on: ', network.listener.port);
+});
 
 // var io = require('socket.io')(80);
 

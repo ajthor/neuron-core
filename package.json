@@ -4,6 +4,7 @@
   "description": "Core Module for Neuron",
   "main": "main.js",
   "scripts": {
+    "start": "node main.js",
     "test": "gulp test"
   },
   "repository": {

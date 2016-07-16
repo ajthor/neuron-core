@@ -1,5 +1,8 @@
 const convict = require('convict');
 
+//
+// http://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?&page=80
+// 
 var cfg = convict({
   ports: {
     // Ports used by the Neuron application are 4194-4198.
